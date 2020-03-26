@@ -13,6 +13,10 @@ package decrease.conquer
 class ClimbingStairs {
 
 
+
+    /**
+     * 动态规划 ，时间 O（n） 空间O（1）
+     */
     fun climbStairs(n: Int): Int {
 
         var previous = 0
