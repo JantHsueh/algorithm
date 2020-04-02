@@ -59,18 +59,6 @@ class LargestRectangleHistogram {
     }
 
 
-    /**
-     * 动态规划的解法
-     *
-     */
-    fun largestRectangleArea2(height: IntArray): Int {
-
-        var maxArea: Int = 0
-
-        return maxArea
-    }
-
-
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
