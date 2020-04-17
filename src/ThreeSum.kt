@@ -14,8 +14,10 @@ class ThreeSum {
 
 
     /**
+     * 1、数组排序
+     * 2、使用双指针进行排查
      *时间复杂度：O(n²)
-    空间复杂度：O(1)
+     *空间复杂度：O(1)
      */
     fun threeSum(nums: IntArray): List<List<Int>> {
 

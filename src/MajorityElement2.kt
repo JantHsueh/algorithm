@@ -13,6 +13,8 @@ class MajorityElement2 {
 
     /**
      * 时间复杂度O(n)  空间复杂度O(n)
+     * 1、使用map 对所有的数 进行排序O(n)
+     * 2、对map 进行查找，value 大于3的key
      */
     fun majorityElement(nums: IntArray): List<Int> {
 
@@ -47,6 +49,14 @@ class MajorityElement2 {
      *
      * 摩尔投票法
      *
+     * 减而知之 策略
+     *
+     * 通过一次遍历，如果不是候选元素，则把候选元素的个数减一，如果候选元素等于0，则替换为新元素
+     *
+     * 与候选元素A相同，则候选元素B不用减一，从而实现候选元素B 有可能达到⌊ n/3 ⌋ 次。
+     *
+     * 因为这一步候选元素B没有减一，所以可能会导致B最终是候选，但是次数没有达到要求，所以需要最后的循环判断
+     *
      * 本题目是，找出超过 ⌊ n/3 ⌋ 次的元素，也就是说最多只能有2个元素，如果3个元素，总数就超过n了
      *
      * 时间复杂度O(n)  空间复杂度O(1)
@@ -65,7 +75,7 @@ class MajorityElement2 {
                 continue
             }
 
-            if (n2 == i ) {
+            if (n2 == i) {
                 n2Count++
                 continue
             }
