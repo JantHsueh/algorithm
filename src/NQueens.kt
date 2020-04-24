@@ -149,7 +149,10 @@ class NQueens {
             val cs = NQueens()
             val time = System.currentTimeMillis()
 
-            println("${2} 阶棋盘，n皇后的解法 ${cs.solveNQueens(2)}")
+            //在n = 15 时，出现了java.lang.OutOfMemoryError: Java heap space
+            //
+            //在n = 18 时，
+            println("${2} 阶棋盘，n皇后的解法 ${cs.solveNQueens(14 )}")
             println("用时：${System.currentTimeMillis() - time}")
 
         }
