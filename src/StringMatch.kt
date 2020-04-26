@@ -149,7 +149,7 @@ class StringMatch {
                 // i ,j 都需要 + 1，来同时向右移动一位，来匹配下一位
 
             } else {
-
+                //如果没有匹配，那么待匹配字符串的 当前匹配位置j 需要往左移动（也可以看做，j 不动，字符串往右移动）
                 j = nextTable[j]!!
             }
         }
@@ -165,7 +165,7 @@ class StringMatch {
      * -1 0 -1 0 -1 3 1 0
      * m  a  m a  m m i a
      */
-     fun buildNextTable3(match: String): Array<Int?> {
+    fun buildNextTable3(match: String): Array<Int?> {
 
         val nextTable = arrayOfNulls<Int>(match.length)
         //假想值，万能匹配
@@ -182,9 +182,9 @@ class StringMatch {
                 j++
                 i++
                 nextTable[i] = if (match[i] != match[j]) {
-                     j
+                    j
                 } else {
-                     nextTable[j]
+                    nextTable[j]
                 }
 
             } else {
@@ -195,13 +195,15 @@ class StringMatch {
 
         return nextTable
     }
-}
 
-fun main(args: Array<String>) {
 
-    val cl = StringMatch()
-    val time = System.currentTimeMillis()
-    //获得的输入行是字符串，需要显示转换
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+
+            val cl = StringMatch()
+            val time = System.currentTimeMillis()
+            //获得的输入行是字符串，需要显示转换
 //    println("输入源字符串：")
 ////    val sourceString = readLine()
 //    val sourceString = "Current Toady I learn synchronized and sign var match"
@@ -220,17 +222,14 @@ fun main(args: Array<String>) {
 //
 //    println("源字符串：${addition}  匹配字符串：${matchString} ")
 //    println("${cl.match1(addition.toString() ?: "", matchString ?: "")}")
-//
+            //
 
-// -1,0,0,1,2,3,1,0
-    var nextString = "mamammia"
-    println(Arrays.toString(cl.buildNextTable3(nextString)))
-
-
+            //  -1,0,0,1,2,3,1,0
+            var nextString = "mamammia"
+            println(Arrays.toString(cl.buildNextTable3(nextString)))
 
 
-
-    println("用时：${System.currentTimeMillis() - time}")
+            println("用时：${System.currentTimeMillis() - time}")
 
 //    Scanner 可以直接获取对应类型，无需显示转换
 //    val read = Scanner(System.`in`)
@@ -238,4 +237,8 @@ fun main(args: Array<String>) {
 //    var age1 = read.nextInt()
 
 
+        }
+    }
+
 }
+
