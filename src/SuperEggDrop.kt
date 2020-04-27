@@ -25,7 +25,7 @@ class SuperEggDrop {
      *
      * 状态：K 个鸡蛋，第N层楼  dp[K][N] 表示K个鸡蛋，N层楼，最小尝试次数
      *
-     * 转移：dp[K][N] = dp[K -1][N-1] + dp[K -1][N-1] + 1
+     * 转移：dp[K][N] = dp[K][N - i] + dp[K -1][i-1] + 1
      *
      *
      * 这个方法，是从根据网上的原理，但是我认为这个解法更像是递归
@@ -59,7 +59,7 @@ class SuperEggDrop {
 
             var res = Int.MAX_VALUE
             for (i in 1..N) {
-                //计算每一层楼最坏情况，把所有的最坏情况取最小值，就是最坏情况的最少次数
+                //因为不知道鸡蛋在第几层楼会碎，所以就拿着K个鸡蛋，在这N层楼每一次都计算一下，所有的最坏情况取最小值，就是最坏情况的最少次数
                 res = Math.min(Math.max(dp(K, N - i), dp(K - 1, i - 1)) + 1, res)
 //                println("      在循环中$K 个鸡蛋 第$i 层楼 需要的次数 $res")
 
@@ -84,7 +84,7 @@ class SuperEggDrop {
      *
      * 状态：K 个鸡蛋，N层楼  dp[K][N] 表示K个鸡蛋，N层楼，最小尝试次数
      *
-     * 转移：dp[K][N] = dp[K -1][N-1] + dp[K -1][N-1] + 1
+     * 转移：dp[K][N] = dp[K][N-i] + dp[K -1][i-1] + 1
      *
      */
     fun superEggDrop1_2(K: Int, N: Int): Int {
@@ -211,7 +211,7 @@ class SuperEggDrop {
 //            val n = 14
 
 
-            println("$k $n 最坏情况最少次数 ${cs.superEggDrop2(k, n)}")
+            println("$k $n 最坏情况最少次数 ${cs.superEggDrop1_1(k, n)}")
 
         }
     }
