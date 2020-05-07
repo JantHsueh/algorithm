@@ -140,6 +140,9 @@ class ChessNCar {
                 visited[y] = true
 
                 if (match[y] == -1 || dfs(match[y])) {
+                    //如果y 没有匹配，就给y匹配一个
+                    //如果y1已经匹配（因为同一个y1可能对应两个x1，x2），就去看看已经与y1 匹配的x1，他有没有对应其他的y2，如果有就把y1 与x2 匹配
+                    //这样保证了，每一次可能匹配的都是被匹配到的
                     match[y] = x
                     return true
                 }

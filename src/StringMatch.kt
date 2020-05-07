@@ -205,7 +205,7 @@ class StringMatch {
             val time = System.currentTimeMillis()
             //获得的输入行是字符串，需要显示转换
 //    println("输入源字符串：")
-////    val sourceString = readLine()
+    val sourceString = readLine()
 //    val sourceString = "Current Toady I learn synchronized and sign var match"
 //
 //    var addition = StringBuilder()
