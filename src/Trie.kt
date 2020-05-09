@@ -11,34 +11,34 @@ class Trie {
     /** Initialize your data structure here. */
 
 
-    var mRoot = TrieNode()
+    var mRoot = TrieNode1()
 
     /** Inserts a word into the trie. */
     fun insert(word: String) {
 
-        var node = mRoot
+        var node: TrieNode1? = mRoot
 
         for (c in word) {
 
-            if (!node.containsKey(c)) {
+            if (node?.containsKey(c) != true) {
                 //如果存在，则往下继续查找
-                node.insert(c, TrieNode())
+                node?.insert(c, TrieNode1())
             }
-            node = node.get(c)
+            node = node?.get(c)
         }
 
-        node.mEnd = true
+        node?.mEnd = true
 
     }
 
     /** Returns if the word is in the trie. */
     fun search(word: String): Boolean {
 
-        var node = mRoot
+        var node: TrieNode1? = mRoot
 
         for (c in word) {
 
-            if (node.containsKey(c)) {
+            if (node?.containsKey(c) == true) {
                 //如果存在，则往下继续查找
                 node = node.get(c)
             } else {
@@ -46,16 +46,16 @@ class Trie {
             }
         }
 
-        return node.mEnd
+        return node?.mEnd == true
     }
 
     /** Returns if there is any word in the trie that starts with the given prefix. */
     fun startsWith(prefix: String): Boolean {
-        var node = mRoot
+        var node: TrieNode1? = mRoot
 
         for (c in prefix) {
 
-            if (node.containsKey(c)) {
+            if (node?.containsKey(c) == true) {
                 //如果存在，则往下继续查找
                 node = node.get(c)
             } else {
@@ -66,6 +66,10 @@ class Trie {
         return true
     }
 
+
+    fun containsKey(c: Char): Boolean {
+        return mRoot.containsKey(c)
+    }
 }
 
 
@@ -121,3 +125,44 @@ class TrieNode {
 
 
 }
+
+
+class TrieNode1 {
+
+
+    //每个节点都可能储存26个字母中的任意一个
+    private var mMap = hashMapOf<Char, TrieNode1>()
+
+
+    //true 表示存在一个字符 从根节点到该节点
+    var mEnd = false
+
+    fun insert(c: Char, childNode: TrieNode1) {
+
+        mMap[c] = childNode
+    }
+
+
+    fun containsKey(c: Char): Boolean {
+
+        return mMap.containsKey(c)
+    }
+
+
+    fun get(c: Char): TrieNode1? {
+
+        return mMap[c]
+    }
+
+    fun remove(c: Char) {
+        mMap.remove(c)
+    }
+
+
+    fun hasChild(): Boolean {
+        return mMap.isNotEmpty()
+    }
+
+}
+
+
