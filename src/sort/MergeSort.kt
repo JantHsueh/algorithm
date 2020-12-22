@@ -24,6 +24,7 @@ class MergeSort {
         mergeSort(array, l, mid)
         mergeSort(array, mid + 1, r)
 
+        //[l,mid] 的数组是有序的，[mid+1,r]的数组是有序的，使用二路归并，合并这两个有序的数组
         var leftArrayStart = l
         var rightArrayStart = mid + 1
         mTempList.clear()

@@ -21,11 +21,11 @@ class MaximumSubarray {
 
 
         var ans = nums[0]
-        var currNum = nums[0]
+        var currTotal = nums[0]
         for (index in 1 until nums.size) {
 
-            currNum = Math.max(currNum, 0) + nums[index]
-            ans = Math.max(ans,currNum)
+            currTotal = Math.max(currTotal, 0) + nums[index]
+            ans = Math.max(ans,currTotal)
         }
 
         return ans

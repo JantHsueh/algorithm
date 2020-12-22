@@ -57,7 +57,7 @@ class QuickSort {
                     s.push(l)
                 }
 
-                if (r < l) {
+                if (t < r) {
                     s.push(r)
                     s.push(t + 1)
                 }

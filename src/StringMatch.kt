@@ -45,7 +45,9 @@ class StringMatch {
      */
     fun match2(source: String, match: String): Int {
 
+        //源字符串的索引
         var sIndex = 0
+        //通过next表，获取到的下一个应该指向 match的哪个位置
         var mIndex = 0
 
         val nextTable = buildNextTable2(match)
@@ -53,11 +55,14 @@ class StringMatch {
 
             while (mIndex < match.length) {
 
+                //mIndex 小于0，说明匹配失败了，源字符串、匹配字符串 都往后移一位，下次就从匹配串的首位开始匹配
                 if (mIndex < 0 || match[mIndex] == source[sIndex]) {
-
+                    //成功匹配一次，源字符串、匹配字符串  索引都+1
                     sIndex++
                     mIndex++
+
                     if (mIndex == match.length - 1) {
+                        //匹配了所有的match字符串
                         return sIndex - match.length
                     }
                 } else {
@@ -140,8 +145,15 @@ class StringMatch {
         //匹配串，不断移动它，来与主串进行匹配
         var j = -1
         while (i < match.length - 1) {
+            var matchChar:Char? = null
+            var sourceChar:Char? = null
+            if (j >= 0){
+                 sourceChar = match[i]
+                 matchChar = match[j]
+            }
 
-            if (j < 0 || match[i] == match[j]) {
+            if (j < 0 || sourceChar == matchChar) {
+
                 //j 小于0，说明遇到万能匹配
                 //与[0,i] 匹配的最长前缀是[0,j]，
                 //所以i +1 的表值是 [0,j]的长度
@@ -205,31 +217,31 @@ class StringMatch {
             val time = System.currentTimeMillis()
             //获得的输入行是字符串，需要显示转换
 //    println("输入源字符串：")
-    val sourceString = readLine()
-//    val sourceString = "Current Toady I learn synchronized and sign var match"
-//
-//    var addition = StringBuilder()
+//    val sourceString = readLine()
+    val sourceString = "Current mamammia Toady I learn synchronized and sign var match"
+
+    var addition = StringBuilder()
 //    for (i in 0..1000000) {
 //        addition.append("Current Toady I learn synchronized and sign var ")
 //    }
 //
-//    addition.append(sourceString)
+    addition.append(sourceString)
+
+    println("输入待匹配字符串：")
+    val matchString = "mamammia"
 //
-//    println("输入待匹配字符串：")
-//    val matchString = "Current Toady I learn synchronized and sign var match"
 //
 //
-//
-//    println("源字符串：${addition}  匹配字符串：${matchString} ")
-//    println("${cl.match1(addition.toString() ?: "", matchString ?: "")}")
+    println("源字符串：${addition}  匹配字符串：${matchString} ")
+    println("${cl.match2(addition.toString() ?: "", matchString ?: "")}")
             //
 
             //  -1,0,0,1,2,3,1,0
-            var nextString = "mamammia"
-            println(Arrays.toString(cl.buildNextTable3(nextString)))
-
-
-            println("用时：${System.currentTimeMillis() - time}")
+//            var nextString = "mamammia"
+//            println(Arrays.toString(cl.buildNextTable3(nextString)))
+//
+//
+//            println("用时：${System.currentTimeMillis() - time}")
 
 //    Scanner 可以直接获取对应类型，无需显示转换
 //    val read = Scanner(System.`in`)
