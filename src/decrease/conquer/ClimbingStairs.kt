@@ -19,7 +19,9 @@ class ClimbingStairs {
      */
     fun climbStairs(n: Int): Int {
 
+        //在楼梯-1 层，不能到达
         var previous = 0
+        //在楼梯的第一层，有1种方法
         var current = 1
 
         for (x in 1 .. n){

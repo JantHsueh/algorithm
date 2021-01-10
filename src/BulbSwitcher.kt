@@ -59,7 +59,7 @@ class BulbSwitcher {
      * 因为数字是连续递增的，所以1 -n 中可以开根号的数字的个数就是 int（n^(1/2)）
      * 也就是最大的平方根
      *
-     * 9 = 3*3 必然会有 2*2  1*1
+     * 若有 3*3 必然会有 2*2  1*1，所以只需要求出最大的平方数即可
      */
     fun bulbSwitch(n: Int): Int {
         return sqrt(n.toDouble()).toInt()
