@@ -155,6 +155,37 @@ class TreeTraversal {
 
 
     /**
+     * 中序遍历
+     */
+    fun inorderTraversal3(root: TreeNode?): List<Int> {
+
+
+        var mResultList: MutableList<Int> = mutableListOf()
+        var mStack: Stack<TreeNode> = Stack()
+        mStack.push(root)
+
+        while (mStack.isNotEmpty()) {
+
+            var node = mStack.pop()
+
+            if (!node.visitOffspring){
+
+                if (node.right != null)mStack.push(node.right)
+                mStack.push(node)
+                if (node.left != null) mStack.push(node.left)
+
+                node.visitOffspring = true
+
+            }else{
+                mResultList.add(node.value)
+            }
+        }
+
+        return mResultList
+    }
+
+
+    /**
      * 递归 后续遍历
      *
      * 左子树 右子树 根节点
@@ -380,11 +411,12 @@ class TreeTraversal {
 //            println(" 先序遍历 ${traversal.preorderTraversal1(mNode1)}")
 //
 //            println(" 中序遍历 ${traversal.inorderTraversal(mNode1)}")
-//            println(" 中序遍历 ${traversal.inorderTraversal2(mNode1)}")
+            println(" 中序遍历 ${traversal.inorderTraversal2(mNode1)}")
+            println(" 中序遍历 ${traversal.inorderTraversal3(mNode1)}")
 //
 //            println(" 后序遍历 ${traversal.postorderTraversal(mNode1)}") //[8, 9, 4, 5, 2, 6, 7, 3, 1]
 //            println(" 后序遍历 ${traversal.postorderTraversal1(mNode1)}")
-            println(" 后序遍历 ${traversal.postorderTraversal2(mNode1)}")
+//            println(" 后序遍历 ${traversal.postorderTraversal2(mNode1)}")
 //            println(" 层次遍历 ${traversal.levelOrder(mNode1)}")
 //            println(" 锯齿遍历 ${traversal.zigzagLevelOrder(mNode1)}")
 

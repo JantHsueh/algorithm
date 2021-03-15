@@ -1,4 +1,4 @@
-package concurrent
+package concurrent.cba
 
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.*
@@ -12,53 +12,41 @@ import java.util.concurrent.locks.*
  *
  */
 
+//锁 能保证线程间的互斥操作，无法保证同步。
+// 例如多个线程 使用同一个锁，可以互斥的访问数据。 但是想让 线程A执行完 执行线程B，锁无法控制。因为锁只能锁当前的线程
+// 用锁实现 也是可以实现的，就是所有的线程使用同一个锁，在使用其它计数变量来控制 A线程 只打印A
+// 因为无法实现同步，若要保证打印顺序，cpu的切换下个线程 ，可能不是期待线程，此时计数就提现作用，不是期待的数值不打印，待cpu切换下个线程
+// 独占锁，多个线程 ，只能有一个线程持有锁，其他进程再想锁，就会被阻塞，所以会出现死锁
 
-//独占锁，多个进程 ，只能有一个进程持有锁，其他进程再想锁，就会被阻塞，所以会出现死锁
-
-//顺序启动  顺序打印
-//   共需要3把锁
-// a 检查上一个锁1是否解锁，加锁 打印 解锁
-// b 检查上一个锁a是否解锁，加锁 打印 解锁
-// c 检查上一个锁b是否解锁，加锁 打印 解锁
-
-
-// 逆序启动，顺序打印，此方法无法实现
-
-// c 检查上一个锁1是否解锁，加锁 打印 解锁
-// b 检查上一个锁a是否解锁，加锁 打印 解锁
-// a 检查上一个锁b是否解锁，加锁 打印 解锁
+//所以只需要一把锁（见方案三），多把锁是无法实现的
 
 
-// 如果是按照启动顺序打印，该方法是可行的，
-// 但是如果按照启动逆序打印，该方法不可行。因为最后启动的线程执行完后，是否对应锁，后一个的期待线程，判断该锁是否释放，Y-》加锁 打印 解锁，N-》循环
-// 问题在于，先启动c，c需要等待的是b，b的对应锁，不能事先上锁，因为是独占锁。加锁解锁只能在同一线程。（由此想到使用共享锁，见方法二）
+private val lockA: ReentrantLock = ReentrantLock()
+private val lockB: ReentrantLock = ReentrantLock()
+private val lockC: ReentrantLock = ReentrantLock()
 
-
-private val lockA: Lock = ReentrantLock()
-private val lockB: Lock = ReentrantLock()
-private val lockC: Lock = ReentrantLock()
-
-//方案一 不可行 ，独占锁，只能有一个进程持有锁，其他进程再想锁，就会被阻塞，所以会出现死锁
-class ThreadPrinter constructor(name: String, lockPre: Lock, lockSelf: Lock) : Runnable {
+//方案一 不可行 ，独占锁，只能有一个线程持有锁，其他进程再想锁，就会被阻塞，所以会出现死锁
+class ThreadPrinter constructor(name: String, lockPre: ReentrantLock, lockSelf: ReentrantLock) : Runnable {
     private val name: String
-    private val lockPre: Lock
-    private val lockSelf: Lock
+    private val lockPre: ReentrantLock
+    private val lockSelf: ReentrantLock
     override fun run() {
 //            System.out.print("开始执行 "+name +" ");
 
         while (true) {
 
             println("thread = ${this.name} lockPre = $lockPre  ,tryLock = ${lockPre.tryLock()}")
-
-            if (lockPre.tryLock()) {
+            //尝试加锁，如果加锁成功，返回true
+            if (!lockPre.isLocked()) {
                 try {
-                    println("thread = ${this.name} 上锁lockSelf = $lockSelf")
+                    println("thread = ${this.name} 加锁lockSelf = $lockSelf")
                     lockSelf.lock()
                     println("------$name-----")
                 } catch (e: Exception) {
                     e.printStackTrace()
                 } finally {
                     lockSelf.unlock()
+                    println("thread = ${this.name} 已解锁 lockSelf = $lockSelf  ,tryLock = ${lockSelf.tryLock()}")
                 }
                 return
             }
@@ -75,7 +63,7 @@ class ThreadPrinter constructor(name: String, lockPre: Lock, lockSelf: Lock) : R
 fun perform() {
 
 //方案一
-// 独占锁，多个进程 ，只能有一个进程持有锁，其他进程再想锁，就会被阻塞，
+// 独占锁，多个线程 ，只能有一个进程持有锁，其他进程再想锁，就会被阻塞，
 // 如果在主线程 锁住，那么想在其他线程再次尝试加锁，就会阻塞，可能会出现死锁
     lockA.lock()
     lockB.lock()
@@ -91,27 +79,29 @@ fun perform() {
     tc.name = "C"
     tc.start()
 
-    Thread.sleep(10)
+    Thread.sleep(100)
 
     val tb = Thread(pb)
     tb.name = "B"
     tb.start()
 
-    Thread.sleep(10)
+    Thread.sleep(100)
 
     val ta = Thread(pa)
     ta.name = "A"
     ta.start()
 
 //    如果是独占锁，因为加锁可能会出现死锁
-    println("lockA unlock  ")
+    println("主线程 lockC unlock  ")
+    lockC.unlock()
+
+    println("主线程 lockA unlock  ")
     lockA.unlock()
 
-    println("lockB unlock  ")
+    println("主线程 lockB unlock  ")
     lockB.unlock()
 
-    println("lockC unlock  ")
-    lockC.unlock()
+
 }
 
 
@@ -261,13 +251,14 @@ fun perform3() {
 }
 
 
-//顺序启动 ，顺序打印，有问题
+//不可行
+//强依赖于 各线程的启动顺序,和线程间隔时间
 //线程切换是随机的，可能会出现A 完全执行完，执行B。或者A执行到一半，c执行了一半，A打印完，打印了C。有可能出现 ABCACB
 class ThreadPrinter41 constructor(name: String, private val prev: Object, private val self: Object) : Thread() {
     override fun run() {
         var count = 10
         while (count > 0) { // 多线程并发，不能用if，必须使用whil循环
-            println("当前 thread = ${this.name} count = ${count}")
+            println("开始循环 当前 thread = ${this.name} count = ${count}")
 
             synchronized(prev) {
                 println("当前 thread = ${this.name} preAny = ${prev} 准备进入自己的同步区 ")
@@ -282,6 +273,9 @@ class ThreadPrinter41 constructor(name: String, private val prev: Object, privat
                     println("当前 thread = ${this.name} selfAny = ${self} 调用notify ")
 
                     self.notifyAll() // 唤醒其他线程竞争self锁，注意此时self锁并未立即释放。
+                    //在这里调用该语句，会休眠当前线程，并释放prev对象锁，self锁依旧持有，其它线程无法进入对应的synchronized
+                    //https://blog.csdn.net/qq_27680317/article/details/78567615
+//                    prev.wait() // 立即释放 prev锁，当前线程休眠，等待唤醒
                 }
                 //此时执行完self的同步块，这时self锁才释放。
                 try {
@@ -297,6 +291,41 @@ class ThreadPrinter41 constructor(name: String, private val prev: Object, privat
             }
         }
     }
+
+}
+
+fun perform41() {
+    val objectA = Object()
+    val objectB = Object()
+    val objectC = Object()
+
+    println("objectA = ${objectA}")
+    println("objectB = ${objectB}")
+    println("objectC = ${objectC}")
+
+
+    val tc = ThreadPrinter41("C", objectB, objectC)
+    val tb = ThreadPrinter41("B", objectA, objectB)
+    val ta = ThreadPrinter41("A", objectC, objectA)
+
+    //下面的启动顺序，即使每个线程的start之间有sleep ，也不能
+    //sleep只能保证线程的启动顺序，启动了不一定立马执行，是由cpu决定的。
+
+//    Thread.sleep(100)
+
+    ta.name = "A"
+    ta.start()
+//    Thread.sleep(100)
+
+    tb.name = "B"
+    tb.start()
+
+//    Thread.sleep(100)
+
+
+    tc.name = "C"
+    tc.start()
+//    Thread.sleep(100)
 
 }
 
@@ -317,23 +346,29 @@ class ThreadPrinter4 constructor(name: String, selfAny: Object, nextAny: Object)
 
     override fun run() {
 
-        println("当前 thread = ${this.name} ")
-        synchronized(selfAny) {
+        var count = 100
+        while (count <= 100) {
 
-            println("当前 thread = ${this.name} selfAny = ${selfAny}调用wait ")
-            selfAny.wait()
+            println("当前 thread = ${this.name} ")
+            synchronized(selfAny) {
 
-            println("------$name-----")
-            synchronized(nextAny) {
+                println("当前 thread = ${this.name} selfAny = ${selfAny}调用wait ")
+                selfAny.wait()
 
-                println("当前 thread = ${this.name}  进入 nextAny = ${nextAny} ")
-                nextAny.notify()
+                println("------$name-----")
+                count--
+                synchronized(nextAny) {
 
-            }
+                    println("当前 thread = ${this.name}  进入 nextAny = ${nextAny} ")
+                    nextAny.notify()
+
+                }
 //            println("当前 thread = ${this.name} preAny = ${nextAny} 准备进入自己的同步区 ")
 
 //            preAny.notify()
+            }
         }
+
 
     }
 
@@ -353,8 +388,7 @@ fun perform4() {
     println("objectB = ${objectB}")
     println("objectC = ${objectC}")
 
-    // 可能会出现死锁，例如：B 拿到objectA的锁，此时切换到A，A拿到objectC的锁，此时切换到C，C拿到objectB的锁，
-    // 这样线程B 拿不到objectB的锁，线程A 拿不到objectA的锁，线程C 拿不到objectC的锁
+
     val tc = ThreadPrinter4("C", objectC, objectA)
     val tb = ThreadPrinter4("B", objectB, objectC)
     val ta = ThreadPrinter4("A", objectA, objectB)
@@ -436,7 +470,7 @@ fun perform5() {
     ta.name = "A"
     ta.start()
 
-    //这里需要等到，线程a的信号出于等到状态，下面的信号触发 才有效
+    //这里需要等到，线程a的信号处于等到状态，下面的信号触发 才有效
     Thread.sleep(1000)
 
     lock.lock()
@@ -495,7 +529,6 @@ fun perform6() {
 }
 
 
-
 //方案七 可行 ，使用，原理和方案五 差不多
 class ThreadPrinter7 constructor(name: String, next: Thread?) : Thread() {
 
@@ -539,12 +572,12 @@ fun perform7() {
 }
 
 
-
 fun main() {
-
+//    perform()
 //    perform3()
-//    perform4()
+    perform4()
+//    perform41()
 //    perform5()
 //    perform6()
-    perform7()
+//    perform7()
 }
