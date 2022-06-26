@@ -8,7 +8,7 @@ package concurrent.abc
  */
 
 
-
+//不可行
 //顺序启动 ，顺序打印，有问题
 //强依赖于 各线程的启动顺序
 //线程切换是随机的，可能会出现A 完全执行完，执行B。或者A执行到一半，c执行了一半，A打印完，打印了C。有可能出现 ABCACB
@@ -67,9 +67,9 @@ fun perform() {
     println("objectC = ${objectC}")
 
 
-    val tc = ThreadPrinter("C", objectC, objectA)
-    val tb = ThreadPrinter("B", objectB, objectC)
-    val ta = ThreadPrinter("A", objectA, objectB)
+    val tc = ThreadPrinter("C", objectB, objectC)
+    val tb = ThreadPrinter("B", objectA, objectB)
+    val ta = ThreadPrinter("A", objectC, objectA)
 
     //下面的启动顺序，即使每个线程的start之间有sleep ，也不能
     //sleep只能保证线程的启动顺序，启动了不一定立马执行，是由cpu决定的。
@@ -87,7 +87,7 @@ fun perform() {
 
     ta.name = "A"
     ta.start()
-//    Thread.sleep(100)
+    Thread.sleep(1000)
 
     synchronized(objectA) {
         //唤醒其它等待在该对象上的线程

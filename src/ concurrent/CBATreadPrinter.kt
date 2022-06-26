@@ -92,19 +92,19 @@ fun perform() {
     ta.start()
 
 //    如果是独占锁，因为加锁可能会出现死锁
-    println("主线程 lockC unlock  ")
+    println("--主线程 lockC unlock  ")
     lockC.unlock()
 
-    println("主线程 lockA unlock  ")
+    println("--主线程 lockA unlock  ")
     lockA.unlock()
 
-    println("主线程 lockB unlock  ")
+    println("--主线程 lockB unlock  ")
     lockB.unlock()
 
 
 }
 
-
+//不可行
 //使用读锁  共享锁，多个进程，可使用同一个锁，不会出现死锁，
 //lockPre 解锁，子线程也可以进入（因为锁是共享的，所以即使在主线程 锁住），但是当前运行的是哪个线程是不确定的，所以打印顺序不可预期
 //这里即使使用 公平锁&共享锁 也是不行的，公平锁是保证
@@ -177,21 +177,23 @@ fun perform2() {
     ta.start()
 
 //    如果是独占锁，因为加锁可能会出现死锁，所以不加锁，解锁也就不需要了
-    println("lockA unlock  ")
-    readLockA.unlock();
+
+
+    println("lockC unlock  ")
+    readLockC.unlock();
 
     println("lockB unlock  ")
     readLockB.unlock();
 
-    println("lockC unlock  ")
-    readLockC.unlock();
+    println("lockA unlock  ")
+    readLockA.unlock();
 }
 
 
-//方案三 可行 ，依赖cpu的线程调度，有一定的运气成分
+//方案三 可行 ，依赖cpu的线程调度，如果cpu一直调度到没有获取锁的线程，就会形成饥饿，但是操作系统会保证线程上cpu
 private val lock: Lock = ReentrantLock()
 
-//引入该变量的目的，相当于创建了3个不同的线程类。只要控制好，该变量的线程安全问题，就能正确大于
+//引入该变量的目的，相当于创建了3个不同的线程类。只要控制好 该变量的线程安全问题，就能正确大于
 private var index: Int = 0
 
 
@@ -352,7 +354,7 @@ class ThreadPrinter4 constructor(name: String, selfAny: Object, nextAny: Object)
             println("当前 thread = ${this.name} ")
             synchronized(selfAny) {
 
-                println("当前 thread = ${this.name} selfAny = ${selfAny}调用wait ")
+                println("进入第一个synchronized 当前 thread = ${this.name} selfAny = ${selfAny}调用wait ")
                 selfAny.wait()
 
                 println("------$name-----")
@@ -574,6 +576,7 @@ fun perform7() {
 
 fun main() {
 //    perform()
+//    perform2()
 //    perform3()
     perform4()
 //    perform41()
