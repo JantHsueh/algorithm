@@ -26,6 +26,7 @@ private val lockB: ReentrantLock = ReentrantLock()
 private val lockC: ReentrantLock = ReentrantLock()
 
 //方案一 不可行 ，独占锁，只能有一个线程持有锁，其他进程再想锁，就会被阻塞，所以会出现死锁
+//
 class ThreadPrinter constructor(name: String, lockPre: ReentrantLock, lockSelf: ReentrantLock) : Runnable {
     private val name: String
     private val lockPre: ReentrantLock
@@ -34,12 +35,11 @@ class ThreadPrinter constructor(name: String, lockPre: ReentrantLock, lockSelf: 
 //            System.out.print("开始执行 "+name +" ");
 
         while (true) {
-
-            println("thread = ${this.name} lockPre = $lockPre  ,tryLock = ${lockPre.tryLock()}")
             //尝试加锁，如果加锁成功，返回true
             if (!lockPre.isLocked()) {
+                println("thread = ${this.name} lockPre = $lockPre ")
                 try {
-                    println("thread = ${this.name} 加锁lockSelf = $lockSelf")
+                    println("thread = ${this.name} 准备加锁lockSelf = $lockSelf")
                     lockSelf.lock()
                     println("------$name-----")
                 } catch (e: Exception) {
@@ -91,7 +91,10 @@ fun perform() {
     ta.name = "A"
     ta.start()
 
-//    如果是独占锁，因为加锁可能会出现死锁
+
+    //如果想环环相扣，只解锁第一个线程，也就是线程A的前置锁lockC，进入线程A想把锁lockA加锁，会报错因为是独占锁，已经在主线程对锁lockA加锁了
+
+    //如果是独占锁，依次解锁，并不能保障打印顺序，线程的运行取决于cpu的调度
     println("--主线程 lockC unlock  ")
     lockC.unlock()
 
@@ -190,7 +193,7 @@ fun perform2() {
 }
 
 
-//方案三 可行 ，依赖cpu的线程调度，如果cpu一直调度到没有获取锁的线程，就会形成饥饿，但是操作系统会保证线程上cpu
+//方案三 可行 ，依赖cpu的线程调度， 获取到锁的线程没有被cpu调度到，其他线程就会空转
 private val lock: Lock = ReentrantLock()
 
 //引入该变量的目的，相当于创建了3个不同的线程类。只要控制好 该变量的线程安全问题，就能正确大于
@@ -332,9 +335,16 @@ fun perform41() {
 }
 
 
-//方案四 可行 ，其原理和方法五一样，因为先运行的线程，极大可能先执行，此时两个synchronized都是可进入的
-//顺序启动，逆序打印的。因为这种方法的本质就是，按照 先后 顺序来加锁的，只要能获得锁，就马上获得，所以先启动的线程（后打印），需要等待，
-//所以线程启动完成后，触发第一个想打印的线程
+//方案四 不可行 ，与ABThreadPrinter.kt的ABThreadPrinter1 一个道理，可能都会阻塞在 selfAny.wait() ，导致无法唤醒
+//当前 thread = B
+//------C-----
+//第二synchronized thread = C  进入 nextAny = java.lang.Object@1f32e575
+//当前 thread = C
+//第一synchronized thread = C selfAny = java.lang.Object@2ff4acd0调用wait
+//当前 thread = A
+//第一synchronized thread = B selfAny = java.lang.Object@279f2327调用wait
+//第一synchronized thread = A selfAny = java.lang.Object@1f32e575调用wait
+// 此时出现死锁
 class ThreadPrinter4 constructor(name: String, selfAny: Object, nextAny: Object) : Thread() {
 
     private var nextAny: Object
@@ -348,20 +358,20 @@ class ThreadPrinter4 constructor(name: String, selfAny: Object, nextAny: Object)
 
     override fun run() {
 
-        var count = 100
-        while (count <= 100) {
+        var count = 10000
+        while (count <= 10000) {
 
             println("当前 thread = ${this.name} ")
             synchronized(selfAny) {
 
-                println("进入第一个synchronized 当前 thread = ${this.name} selfAny = ${selfAny}调用wait ")
+                println("第一synchronized thread = ${this.name} selfAny = ${selfAny}调用wait ")
                 selfAny.wait()
 
                 println("------$name-----")
                 count--
                 synchronized(nextAny) {
 
-                    println("当前 thread = ${this.name}  进入 nextAny = ${nextAny} ")
+                    println("第二synchronized thread = ${this.name}  进入 nextAny = ${nextAny} ")
                     nextAny.notify()
 
                 }
@@ -439,10 +449,11 @@ class ThreadPrinter5 constructor(name: String, self: Condition, next: Condition)
         try {
             //必须获取到锁，才能使用await，signal。否则会报异常java.lang.IllegalMonitorStateException
             lock.lock()
-            println("当前 thread = ${this.name} 加锁成功 self = ${self} 执行等待")
+            println("thread = ${this.name} 加锁成功 self = ${self} 执行等待")
+            //线程会释放锁并进入等待状态，等待signal后被唤醒
             self.await()
             println("------$name-----")
-            println("当前 thread = ${this.name} , 被唤醒, 触发信号 next = ${next}")
+            println("thread = ${this.name} , 被唤醒, 触发信号 next = ${next}")
             next.signal()
 
         } catch (e: Exception) {
@@ -473,7 +484,7 @@ fun perform5() {
     ta.start()
 
     //这里需要等到，线程a的信号处于等到状态，下面的信号触发 才有效
-    Thread.sleep(1000)
+    Thread.sleep(100)
 
     lock.lock()
     conditionA.signal()
@@ -497,10 +508,11 @@ class ThreadPrinter6 constructor(name: String, self: Semaphore, next: Semaphore)
     override fun run() {
 
         try {
-            println("当前 thread = ${this.name} 消耗一个信号 self = ${self} ")
+            println("thread = ${this.name} 线程获取一个信号 self = ${self} ")
             self.acquire()
             println("------$name-----")
-            println("当前 thread = ${this.name} , 被唤醒, 增加一个信号 next = ${next}")
+            println("thread = ${this.name} , 被唤醒, 释放一个信号 next = ${next}")
+            // 释放一个信号，供下一个线程获取
             next.release()
         } catch (e: Exception) {
             println(e.toString())
@@ -578,9 +590,9 @@ fun main() {
 //    perform()
 //    perform2()
 //    perform3()
-    perform4()
+//    perform4()
 //    perform41()
-//    perform5()
+    perform5()
 //    perform6()
 //    perform7()
 }

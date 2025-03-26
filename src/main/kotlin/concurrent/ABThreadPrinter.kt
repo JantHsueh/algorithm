@@ -88,18 +88,31 @@ fun perform() {
 //    }
 }
 
-//方案1 可行
-class ABThreadPrinter1 constructor(val self: Object, val next: Object) : Thread() {
+//方案1  不可行，会出现死锁
+
+//---A----notify---java.lang.Object@5ca881b5
+//---A----in---java.lang.Object@24d46ca6
+//---B----2233
+//---B----notify---java.lang.Object@24d46ca6
+//---A----2234
+//---A----notify---java.lang.Object@5ca881b5
+//---A----in---java.lang.Object@24d46ca6
+//---B----in---java.lang.Object@5ca881b5
+// 此时死锁了
+class ABThreadPrinter1 constructor(val pre: Object, val self: Object) : Thread() {
 
     override fun run() {
         super.run()
-        while (i <= 100) {
-            synchronized(self) {
-                self.wait()
+        while (i <= 10000) {
+            synchronized(pre) {
+                println("---$name----in---${pre}") //打印
+                pre.wait()
                 println("---$name----${i++}") //打印
-                synchronized(next) {
+                synchronized(self) {
 
-                    next.notify()
+                    self.notify()
+                    println("---$name----notify---${self}") //打印
+
                 }
             }
         }
@@ -131,9 +144,6 @@ fun perform1() {
     tb.name = "B"
     tb.start()
 
-    //这里不能进行唤醒，否则会出现 ，A B 死锁的问题。
-    //例如： A 执行完一次，调用prev.wait() ，然后又被下面的语句唤醒，执行synchronized(prev = b)
-    //此时 其它cpu上的B 进程 执行synchronized(prev = a)，此时就都会阻塞在synchronized(self)
     synchronized(objectB) {
         //唤醒其它等待在该对象上的线程
         objectB.notify()
