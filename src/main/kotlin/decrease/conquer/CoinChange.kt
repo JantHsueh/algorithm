@@ -1,4 +1,4 @@
-package decrease.conquer
+package org.example.decrease.conquer
 
 import kotlin.math.min
 

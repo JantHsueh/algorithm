@@ -1,6 +1,5 @@
 package concurrent.ab
 
-import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
 
@@ -183,8 +182,8 @@ fun main() {
 
 
 //    perform()
-    perform2()
-//    perform1()
+//    perform2()
+    perform1()
 //    perform6()
 //    perform7()
 }

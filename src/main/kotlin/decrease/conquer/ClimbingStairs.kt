@@ -1,4 +1,4 @@
-package decrease.conquer
+package org.example.decrease.conquer
 
 /**
  * create by xuexuan
