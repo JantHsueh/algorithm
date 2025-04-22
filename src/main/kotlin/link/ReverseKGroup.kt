@@ -1,3 +1,7 @@
+package link
+
+import ListNode
+
 /**
  * create by xuexuan
  * time 2025/4/22 10:27
