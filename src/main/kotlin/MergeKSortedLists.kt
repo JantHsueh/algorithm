@@ -57,20 +57,20 @@ class MergeKSortedLists {
         var currNodeA = listA
         var currNodeB = listB
 
-        if ((currNodeA.`val`?:0) < (currNodeB.`val`?:0)) {
+        if ((currNodeA.value?:0) < (currNodeB.value?:0)) {
 
-            list = ListNode(currNodeA.`val`)
+            list = ListNode(currNodeA.value)
             currNodeA = currNodeA.next
         } else {
 
-            list = ListNode(currNodeB.`val`)
+            list = ListNode(currNodeB.value)
             currNodeB = currNodeB.next
         }
         var tail = list
 
         while (currNodeA != null && currNodeB != null) {
 
-            if ((currNodeA.`val`?:0) < (currNodeB.`val`?:0)) {
+            if ((currNodeA.value?:0) < (currNodeB.value?:0)) {
 
                 tail?.next = currNodeA
                 currNodeA = currNodeA.next
@@ -100,7 +100,7 @@ class MergeKSortedLists {
      */
     fun mergeKLists1(lists: Array<ListNode?>): ListNode? {
 
-        val queue = PriorityQueue<ListNode?>() { o1, o2 -> (o1?.`val`?:0) - (o2?.`val`?:0) }
+        val queue = PriorityQueue<ListNode?>() { o1, o2 -> (o1?.value?:0) - (o2?.value?:0) }
         var list:ListNode? = ListNode(0)
         var tail = list
 
@@ -175,6 +175,6 @@ class MergeKSortedLists {
  * }
  */
 
-class ListNode(var `val`: Int? = null) {
+class ListNode(var value: Int? = null) {
     var next: ListNode? = null
 }
