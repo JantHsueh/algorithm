@@ -30,7 +30,8 @@ class ReverseKGroup {
         while (nextKHead != null) {
             nextKHead = moveTail(head, k)
 
-            headRevered = reverse(head, nextKHead,k)
+//            headRevered = reverse(head, nextKHead,k)
+            headRevered = reverse1(head, nextKHead)
 
             if (resultNode == null) {
                 resultNode = headRevered
@@ -87,13 +88,78 @@ class ReverseKGroup {
     }
 
 
+    fun reverseKGroup1(listHead: ListNode?, k: Int): ListNode? {
+
+        var segHead = listHead
+        var preSegTail : ListNode? = null
+        var resultNode: ListNode? = null
+
+        while (segHead != null) {
+            val segTail = splitList(segHead, k)
+
+            if (segTail == null){
+                preSegTail?.next = segHead
+                break
+            }
+
+
+            val nextSegHead = segTail?.next
+            reverse1(segHead, segTail)
+
+            // 此时已经转换完成，segTail 是新的队头， segHead 是队尾
+            if (resultNode == null){
+                resultNode = segTail
+            }
+
+            preSegTail?.next = segTail
+            preSegTail = segHead
+
+            segHead = nextSegHead
+        }
+
+        return resultNode
+
+    }
+
+    fun splitList(head: ListNode?, k: Int): ListNode? {
+        var tail = head
+        for (i in 0 until k-1) {
+
+            tail = tail?.next
+        }
+        return tail
+    }
+
+    fun reverse1(head: ListNode?, tail: ListNode?): ListNode?{
+
+        var pre:ListNode? = null
+        var cur = head
+        var next = head?.next
+
+        while (true){
+            cur?.next = pre
+
+            if (cur == tail){
+               break
+            }
+            pre = cur
+            cur = next
+            next = cur?.next
+
+        }
+        return head
+
+    }
+
+
+
 }
 
 
 fun main() {
 
 
-    val input = intArrayOf(1, 2, 3, 4, 5)
+    val input = intArrayOf(1, 2, 3, 4, 5,6,7,8,9,10)
 
     val headNode = ListNode()
     headNode.value = input[0]
@@ -108,7 +174,7 @@ fun main() {
     }
 
     val reverseKGroup = ReverseKGroup()
-    val node =  reverseKGroup.reverseKGroup(headNode, 3)
+    val node =  reverseKGroup.reverseKGroup1(headNode, 3)
 
     var currNode = node
     while (currNode != null) {

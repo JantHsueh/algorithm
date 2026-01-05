@@ -1,5 +1,6 @@
 package concurrent.ab
 
+import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
 
 
@@ -152,15 +153,16 @@ fun perform1() {
 
 //方案二 可行
 private var lock = ReentrantLock()
-class ABThreadPrinter2 constructor(val lock :ReentrantLock,var seko:Int ):Thread(){
+
+class ABThreadPrinter2 constructor(val lock: ReentrantLock, var seko: Int) : Thread() {
 
     override fun run() {
         super.run()
-        while (i < 100){
+        while (i < 100) {
 
             try {
                 lock.lock()
-                if (i % 2 == seko){
+                if (i % 2 == seko) {
                     println("---$name----${i++}") //打印
                 }
             } finally {
@@ -187,13 +189,44 @@ fun perform2() {
 }
 
 
+class ABThreadPrinter3(val name1: String, val self: Semaphore, val next: Semaphore) : Thread() {
+
+
+    override fun run() {
+        super.run()
+
+        while (true) {
+
+            self.acquire()
+
+            println(this.name1)
+            next.release()
+        }
+    }
+
+}
+
+fun perform3(){
+
+    val sa = Semaphore(1)
+    val sb = Semaphore(0)
+    val aThread = ABThreadPrinter3("a",sa,sb)
+    val bThread = ABThreadPrinter3("b",sb,sa)
+
+    bThread.start()
+    aThread.start()
+
+
+}
+
 
 fun main() {
 
 
 //    perform()
 //    perform2()
-    perform1()
+//    perform1()
 //    perform6()
 //    perform7()
+    perform3()
 }

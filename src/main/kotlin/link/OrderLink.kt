@@ -53,18 +53,67 @@ class OrderLink {
     fun reverseLink(head: ListNode?): ListNode? {
         if (head == null) return null
 
-        var cur = head
         var pre: ListNode? = null
-        var next: ListNode?
+        var cur = head
+        var next: ListNode? = cur?.next
 
         while (cur != null) {
-            next = cur.next
             cur.next = pre
             pre = cur
             cur = next
+            next = cur?.next
         }
 
         return pre
+    }
+
+
+    fun mergeLink1(a: ListNode?, b: ListNode?): ListNode? {
+
+        if (a == null) {
+            return b
+        }
+
+        if (b == null) {
+            return a
+        }
+
+        var head: ListNode? = null
+        var tail: ListNode? = null
+        var small = a
+        var big = b
+
+
+        if ((a?.value ?: 0) < (b?.value ?: 0)) {
+            small = a
+            big = b
+        } else {
+            small = b
+            big = a
+        }
+        head = small
+        var preSmall = small
+        while (small != null && big != null) {
+
+            while (small != null && (small?.value ?: 0) < (big?.value ?: 0)) {
+                preSmall = small
+                small = small?.next
+            }
+
+            preSmall?.next = big
+
+
+            val temp = big
+            big = small
+            small = temp
+        }
+
+//        if (big != null){
+//            tail?.next = aTemp
+//        }
+
+
+        return head
     }
 
 
@@ -112,7 +161,7 @@ class OrderLink {
 fun main() {
 
 
-    val input = intArrayOf(1, 8, 3, 6, 5, 4, 7, 2)
+    val input = intArrayOf(1, 5, 4, 7, 8, 9, 11, 2)
 
     val headNode: ListNode? = ListNode()
     headNode?.value = input[0]

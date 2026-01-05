@@ -46,7 +46,7 @@ class ThreadPrinter constructor(name: String, lockPre: ReentrantLock, lockSelf: 
                     e.printStackTrace()
                 } finally {
                     lockSelf.unlock()
-                    println("thread = ${this.name} 已解锁 lockSelf = $lockSelf  ,tryLock = ${lockSelf.tryLock()}")
+                    println("thread = ${this.name} 已解锁 lockSelf = $lockSelf ")
                 }
                 return
             }
@@ -587,12 +587,12 @@ fun perform7() {
 
 
 fun main() {
-//    perform()
+    perform()
 //    perform2()
 //    perform3()
 //    perform4()
 //    perform41()
-    perform5()
+//    perform5()
 //    perform6()
 //    perform7()
 }

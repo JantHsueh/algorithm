@@ -1,6 +1,8 @@
 package sort
 
 import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * create by xuexuan
@@ -26,7 +28,7 @@ class QuickSort {
 
         if (left < right) {
 
-            val t = partition2(array, left, right)
+            val t = partition3(array, left, right)
             quickSort(array, left, t - 1)
             quickSort(array, t + 1, right)
         }
@@ -69,6 +71,34 @@ class QuickSort {
         return array
     }
 
+    /**
+     * 排序后，左小右大
+     * 非递归 ，使用队列实现
+     */
+    fun quickSort3(array: IntArray, left: Int, right: Int): IntArray {
+
+        val queue = LinkedList<Pair<Int, Int>>()
+        queue.push(Pair(left, right))
+
+        while (queue.isNotEmpty()) {
+
+            val p = queue.poll()
+            val l = p.first
+            val r = p.second
+            val pivot = partition3(array, l, r)
+
+            if (l < pivot - 1) {
+                queue.add(Pair(l, pivot - 1))
+            }
+
+            if (pivot + 1 < r) {
+                queue.add(Pair(pivot + 1, p.second))
+            }
+        }
+
+        return array
+
+    }
 
     /**
      *
@@ -109,6 +139,49 @@ class QuickSort {
         }
         //上面每一次操作都判断，l < r,所以退出大循环，肯定是l =r，不可能出现l > r
         array[l] = pivot
+        return l
+    }
+
+
+    /**
+     *
+     * 寻找轴点
+     *
+     * 方式一：
+     * 左小右大，那么轴点：左边的元素都比轴点元素小，右边所有的元素都比轴点大
+     * 左右两边不断增大，最后定出轴点的位置
+     */
+    fun partition3(array: IntArray, left: Int, right: Int): Int {
+
+        val pivot = array[left]
+
+        var l = left
+        var r = right
+
+        while (l < r) {
+            while (l < r) {
+                if (pivot < array[r]) {
+                    r--
+                } else {
+                    array[l] = array[r]
+                    l++
+                    break
+                }
+            }
+
+            while (l < r) {
+                if (array[l] <= pivot) {
+                    l++
+                } else {
+                    array[r] = array[l]
+                    r--
+                    break
+                }
+            }
+        }
+
+        array[l] = pivot
+
         return l
     }
 
@@ -191,6 +264,11 @@ class QuickSort {
         return lo
     }
 
+
+
+
+
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
@@ -198,7 +276,7 @@ class QuickSort {
 
             val list = arrayListOf(4, 2, 9, 1, 5, 6, 3, 7)
 //            val list = arrayListOf(1, 2, 3, 4, 5, 6, 8, 9)
-            println("$list  快速排序 ${Arrays.toString(cs.quickSort1(list.toIntArray(), 0, list.size - 1))}")
+            println("$list  快速排序 ${Arrays.toString(cs.quickSort3(list.toIntArray(), 0, list.size - 1))}")
 
         }
     }
